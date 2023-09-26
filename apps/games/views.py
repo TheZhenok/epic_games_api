@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.validators import ValidationError
 
 from games.models import Game
-from games.serializers import GameSerializer
+from games.serializers import GameSerializer, GameCreateSerializer
 
 
 class GameViewSet(viewsets.ViewSet):
@@ -40,3 +40,19 @@ class GameViewSet(viewsets.ViewSet):
         
         serializer = GameSerializer(instance=game)
         return Response(data=serializer.data)
+
+    def create(
+        self,
+        request: Request,
+        *args: tuple,
+        **kwargs: dict
+    ) -> Response:
+        serializer = GameCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        game: Game = serializer.save()
+        return Response(
+            data={
+                "status": "ok",
+                "message": f"Game {game.name} is created! Id: {game.pk}"
+            }
+        )
