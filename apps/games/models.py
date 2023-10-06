@@ -1,5 +1,6 @@
-from django.db import models
+# Django
 from django.core.validators import MinValueValidator
+from django.db import models
 
 
 class Game(models.Model):

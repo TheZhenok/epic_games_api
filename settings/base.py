@@ -1,7 +1,11 @@
-from pathlib import Path
-import sys
+# Python
 import os
+import sys
+from pathlib import Path
+
+# Third party
 from decouple import config
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(BASE_DIR)
