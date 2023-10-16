@@ -5,6 +5,9 @@ from typing import Optional
 from rest_framework.request import Request
 from rest_framework.response import Response as JsonResponse
 from rest_framework.viewsets import ViewSet
+from rest_framework.permissions import (
+    IsAuthenticated
+)
 
 # First party
 from abstracts.mixins import (
@@ -23,6 +26,7 @@ class GameViewSet(ResponseMixin, ObjectMixin, ViewSet):
     ViewSet for Game model.
     """
     queryset = Game.objects.all()
+    permission_classes = [IsAuthenticated]
 
     def list(
         self,
@@ -36,6 +40,7 @@ class GameViewSet(ResponseMixin, ObjectMixin, ViewSet):
                 many=True
             )
         return self.json_response(serializer.data)
+
 
     def retrieve(
         self,

@@ -12,9 +12,7 @@ sys.path.append(BASE_DIR)
 sys.path.append(os.path.join(BASE_DIR, 'apps'))
 
 SECRET_KEY = config('SECRET_KEY', str)
-
 DEBUG = config('DEBUG', bool)
-
 ALLOWED_HOSTS = ['*']
 
 DJANGO_APPS = [
@@ -27,6 +25,7 @@ DJANGO_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
+    'rest_framework_simplejwt',
 ]
 PROJECT_APPS = [
     'games.apps.GamesConfig',
@@ -101,3 +100,11 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
+from settings.jwt import SIMPLE_JWT  # noqa
