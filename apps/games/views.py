@@ -3,18 +3,20 @@ from typing import Optional
 
 # DRF
 from rest_framework.request import Request
+from rest_framework.decorators import action
 from rest_framework.response import Response as JsonResponse
 from rest_framework.viewsets import ViewSet
 from rest_framework.permissions import (
     IsAuthenticated
 )
+from django.core.exceptions import ValidationError
 
 # First party
 from abstracts.mixins import (
     ObjectMixin,
     ResponseMixin
 )
-from games.models import Game
+from games.models import Game, Subscribe
 from games.serializers import (
     GameCreateSerializer,
     GameSerializer
@@ -40,7 +42,6 @@ class GameViewSet(ResponseMixin, ObjectMixin, ViewSet):
                 many=True
             )
         return self.json_response(serializer.data)
-
 
     def retrieve(
         self,
@@ -120,3 +121,28 @@ class GameViewSet(ResponseMixin, ObjectMixin, ViewSet):
         game.delete()
 
         return self.json_response(f'{name} was deleted')
+
+    @action(
+        methods=['POST'],
+        detail=False,
+        url_path='sub/(?P<pk>[^/.]+)'
+    )
+    def subscribe(self, request: Request, pk: int = None) -> JsonResponse:
+        game = self.get_object(
+            queryset=Game.objects.all(),
+            obj_id=pk
+        )
+        sub = Subscribe.objects.create(
+            user=request.user,
+            is_active=True,
+            game=game
+        )
+        return self.json_response(
+            data={
+                "message": {
+                    "game_id": game.id,
+                    "subscribe_id": sub.id,
+                    "date_finished": sub.datetime_finished
+                }
+            }
+        )
