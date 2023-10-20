@@ -2,33 +2,42 @@
 from typing import Optional
 
 # DRF
-from rest_framework.request import Request
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response as JsonResponse
 from rest_framework.viewsets import ViewSet
-from rest_framework.permissions import (
-    IsAuthenticated
-)
+
+# Django
 from django.core.exceptions import ValidationError
+from django.db.models import query
 
 # First party
 from abstracts.mixins import (
     ObjectMixin,
     ResponseMixin
 )
-from games.models import Game, Subscribe
+from games.models import (
+    Game,
+    Subscribe
+)
 from games.serializers import (
     GameCreateSerializer,
     GameSerializer
 )
+
+# Local
+from .permissions import GamePermission
 
 
 class GameViewSet(ResponseMixin, ObjectMixin, ViewSet):
     """
     ViewSet for Game model.
     """
+    permission_classes = (
+        GamePermission,
+    )
     queryset = Game.objects.all()
-    permission_classes = [IsAuthenticated]
 
     def list(
         self,
@@ -121,6 +130,21 @@ class GameViewSet(ResponseMixin, ObjectMixin, ViewSet):
         game.delete()
 
         return self.json_response(f'{name} was deleted')
+
+    @action(
+        methods=['POST'],
+        detail=False
+    )
+    def show_hidden_games(self, request: Request) -> JsonResponse:
+        hidden_games: query.QuerySet = \
+            Game.objects.filter(is_hidden=True)
+
+        serializer: GameSerializer = \
+            GameSerializer(
+                instance=hidden_games,
+                many=True
+            )
+        return self.json_response(serializer.data)
 
     @action(
         methods=['POST'],

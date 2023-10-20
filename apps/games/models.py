@@ -1,8 +1,9 @@
+# Python
 import datetime
 
 # Django
-from django.core.validators import MinValueValidator
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator
 from django.db import models
 
 
@@ -28,6 +29,10 @@ class Game(models.Model):
     rate: float = models.FloatField(
         verbose_name='рейтинг',
         max_length=5
+    )
+    is_hidden: bool = models.BooleanField(
+        verbose_name='скрыта ли',
+        default=False
     )
 
     class Meta:
