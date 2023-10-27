@@ -26,6 +26,7 @@ DJANGO_APPS = [
 
     'rest_framework',
     'rest_framework_simplejwt',
+    'django_celery_results'
 ]
 PROJECT_APPS = [
     'games.apps.GamesConfig',
@@ -108,3 +109,10 @@ REST_FRAMEWORK = {
 }
 
 from settings.jwt import SIMPLE_JWT  # noqa
+
+CELERY_TIMEZONE = "Asia/Almaty"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_CACHE_BACKEND = 'redis'
+CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"

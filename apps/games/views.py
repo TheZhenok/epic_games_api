@@ -1,5 +1,6 @@
 # Python
 from typing import Optional
+from datetime import datetime, date
 
 # DRF
 from rest_framework.decorators import action
@@ -21,6 +22,7 @@ from games.models import (
     Game,
     Subscribe
 )
+from games.tasks import do_test, cancel_subcribe
 from games.serializers import (
     GameCreateSerializer,
     GameSerializer
@@ -149,7 +151,7 @@ class GameViewSet(ResponseMixin, ObjectMixin, ViewSet):
     @action(
         methods=['POST'],
         detail=False,
-        url_path='sub/(?P<pk>[^/.]+)'
+        url_path='sub/game/(?P<pk>[^/.]+)'
     )
     def subscribe(self, request: Request, pk: int = None) -> JsonResponse:
         game = self.get_object(
@@ -161,6 +163,10 @@ class GameViewSet(ResponseMixin, ObjectMixin, ViewSet):
             is_active=True,
             game=game
         )
+        cancel_subcribe.apply_async(
+            kwargs={'subcribe_id': sub.id},
+            countdown=60*60*24*30
+        )
         return self.json_response(
             data={
                 "message": {
@@ -169,4 +175,16 @@ class GameViewSet(ResponseMixin, ObjectMixin, ViewSet):
                     "date_finished": sub.datetime_finished
                 }
             }
+        )
+    
+    @action(
+        methods=['GET'], detail=False, url_path='sub/check/(?P<pk>[^/.]+)'
+    )
+    def check_subcribe(self, request: Request, pk: int = None):
+        do_test.apply_async(
+            kwargs={'game_id': pk}, 
+            countdown=30
+        )
+        return self.json_response(
+            data={"message": "ok"}
         )
