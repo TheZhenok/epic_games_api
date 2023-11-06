@@ -9,10 +9,12 @@ from rest_framework_simplejwt.views import (
 
 
 from games.views import GameViewSet
+from auths.views import UserViewSet
 
 
 router = DefaultRouter()
 router.register(r'game', GameViewSet)
+router.register(r'user', UserViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
