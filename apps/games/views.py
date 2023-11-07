@@ -1,16 +1,14 @@
 # Python
 from typing import Optional
-from datetime import datetime, date
+from datetime import datetime
 
 # DRF
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response as JsonResponse
 from rest_framework.viewsets import ViewSet
 
 # Django
-from django.core.exceptions import ValidationError
 from django.db.models import query
 
 # First party
@@ -22,10 +20,13 @@ from games.models import (
     Game,
     Subscribe
 )
-from games.tasks import do_test, cancel_subcribe
 from games.serializers import (
     GameCreateSerializer,
     GameSerializer
+)
+from games.tasks import (
+    cancel_subcribe,
+    test_worker
 )
 
 # Local
@@ -154,6 +155,8 @@ class GameViewSet(ResponseMixin, ObjectMixin, ViewSet):
         url_path='sub/game/(?P<pk>[^/.]+)'
     )
     def subscribe(self, request: Request, pk: int = None) -> JsonResponse:
+        CANCEL_TIMEOUT_30_DAYS = 30 * 24 * 60 * 60
+
         game = self.get_object(
             queryset=Game.objects.all(),
             obj_id=pk
@@ -164,27 +167,31 @@ class GameViewSet(ResponseMixin, ObjectMixin, ViewSet):
             game=game
         )
         cancel_subcribe.apply_async(
-            kwargs={'subcribe_id': sub.id},
-            countdown=60*60*24*30
+            kwargs={
+                'subcribe_id': sub.id
+            },
+            countdown=CANCEL_TIMEOUT_30_DAYS
         )
         return self.json_response(
             data={
-                "message": {
-                    "game_id": game.id,
-                    "subscribe_id": sub.id,
-                    "date_finished": sub.datetime_finished
+                'message': {
+                    'game_id': game.id,
+                    'subscribe_id': sub.id,
+                    'date_finished': sub.datetime_finished
                 }
             }
         )
-    
+
     @action(
-        methods=['GET'], detail=False, url_path='sub/check/(?P<pk>[^/.]+)'
+        methods=['GET'],
+        detail=False,
+        url_path='sub/check/(?P<pk>[^/.]+)'
     )
     def check_subcribe(self, request: Request, pk: int = None):
-        do_test.apply_async(
-            kwargs={'game_id': pk}, 
-            countdown=30
+        test_worker.apply_async(
+            kwargs={'game_id': pk},
+            countdown=10
         )
         return self.json_response(
-            data={"message": "ok"}
+            data={'message': 'ok'}
         )
