@@ -1,11 +1,15 @@
-from typing import Any
-from django.core.management.base import BaseCommand, CommandError
-from django.contrib.auth.models import User, BaseUserManager
-from django.contrib.auth.hashers import make_password
-from django.db.utils import IntegrityError
-
-import names
+# Python
 import random
+from typing import Any
+
+# Django
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import (
+    BaseUserManager,
+    User
+)
+from django.core.management.base import BaseCommand
+from django.db.utils import IntegrityError
 
 
 class Command(BaseCommand):
@@ -27,10 +31,9 @@ class Command(BaseCommand):
             return "@" + random.choice(domains)
 
         TOTAL_USERS_COUNT = 50000
-        CURRETNS_USERS_COUNT = User.objects.all().count()
+        CURRENT_USERS_COUNT = User.objects.all().count()
         try:
-            users: list[User] = []
-            for i in range(CURRETNS_USERS_COUNT, TOTAL_USERS_COUNT):
+            for i in range(CURRENT_USERS_COUNT, TOTAL_USERS_COUNT):
                 username = _generate_username()
                 password = "qwerty"
                 email = username + _generate_email_domain()

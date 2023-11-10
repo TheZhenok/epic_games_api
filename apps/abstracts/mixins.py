@@ -1,5 +1,9 @@
 # Python
-from typing import Any
+from typing import (
+    Any,
+    Union,
+    Optional
+)
 
 # DRF
 from rest_framework.response import Response as JsonResponse
@@ -7,6 +11,12 @@ from rest_framework.validators import ValidationError
 
 # Django
 from django.db.models import query
+
+# First party
+from auths.paginators import (
+    UserLimitOffsetPaginator,
+    UserPageNumberPaginator
+)
 
 
 class ObjectMixin:
@@ -45,15 +55,26 @@ class ResponseMixin:
     def json_response(
         self,
         data: Any,
-        status: str = STATUS_SUCCESS
+        status: str = STATUS_SUCCESS,
+        paginator: Union[
+            UserPageNumberPaginator,
+            UserLimitOffsetPaginator,
+            None
+        ] = None
     ) -> JsonResponse:
+
+        response: Optional[JsonResponse] = None
 
         if status not in self.STATUSES:
             raise ValidationError('FATAL ERROR')
 
-        return JsonResponse(
-            {
-                'status': status,
-                'results': data
-            }
-        )
+        if paginator:
+            response = paginator.get_paginated_response(data)
+        else:
+            response = JsonResponse(
+                {
+                    'status': status,
+                    'results': data
+                }
+            )
+        return response

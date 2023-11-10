@@ -1,9 +1,10 @@
+# Django
+from django.contrib.auth.models import User
+from django.core.mail import send_mail
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from django.contrib.auth.models import User
-from django.core.mail import send_mail
-
+# First party
 from games.models import Game
 
 
@@ -21,4 +22,3 @@ def span_attack_when_create_new_game(
         from_email='zhenok1109@gmail.com',
         recipient_list=emails
     )
-
