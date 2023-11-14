@@ -71,7 +71,7 @@ WSGI_APPLICATION = 'settings.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 AUTH_PASSWORD_VALIDATORS = [
@@ -104,7 +104,6 @@ REST_FRAMEWORK = {
 }
 # First party
 from settings.jwt import SIMPLE_JWT
-
 
 CELERY_TIMEZONE = 'Asia/Almaty'
 CELERY_TASK_TRACK_STARTED = True
